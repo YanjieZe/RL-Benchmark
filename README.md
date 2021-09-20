@@ -4,7 +4,8 @@ An RL Benchmark. Easy to use, experiment, visualize, compare results, and extend
 # Supported Algorithms
 - [ ] Model-free
     - [ ] Value-based
-        - [x] DQN (i.e., Double DQN)
+        - [x] DQN
+        - [x] Double DQN
         - [ ] Dueling DQN
     - [ ] Policy-based
         - [ ] AC
@@ -42,4 +43,13 @@ To run a **demo**, simply run `python run.py`.
 Param:
 ```
 Namespace(batch_size=64, benchmark='DQN', device='cuda:0', env='CartPole-v1', epoch=500, epsilon=0.01, gamma=0.95, hidden=128, lr=0.002, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
+```
+## Double DQN
+Just change the way we computer Q target:
+
+r + Q_target(s, a_target) -> r + Q_target(s, a_origin)
+
+Param:
+```
+Namespace(batch_size=64, benchmark='DoubleDQN', device='cuda:0', env='CartPole-v1', epoch=500, epsilon=0.01, gamma=0.95, hidden=128, lr=0.001, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
 ```
