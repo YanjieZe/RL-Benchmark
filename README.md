@@ -30,6 +30,8 @@ To run a **demo**, simply run `python run.py`.
 # Benchmark Results
 ![](./result/DQN_CartPole-v1.png)
 
+![](./result/DoubleDQN_CartPole-v1.png)
+
 # Implementation Details and Tricks
 ## DQN
 1. Replay buffer: use `deque`.
