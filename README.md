@@ -1,5 +1,5 @@
 # RL-Benchmark
-An RL Benchmark. Easy to use, experiment, visualize, compare results and extend.
+An RL Benchmark. Easy to use, experiment, visualize, compare results, and extend.
 
 # Supported Algorithms
 - [ ] Model-free
@@ -25,6 +25,9 @@ An RL Benchmark. Easy to use, experiment, visualize, compare results and extend.
 Use `python run.py -h` to see the available parameters and get help.
 
 To run a **demo**, simply run `python run.py`.
+
+# Benchmark Results
+![](./result/DQN_CartPole-v1.png)
 
 # Implementation Details and Tricks
 ## DQN
