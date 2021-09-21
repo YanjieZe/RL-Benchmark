@@ -3,10 +3,10 @@ An RL Benchmark. Easy to use, experiment, visualize, compare results, and extend
 
 # Supported Algorithms
 - [ ] Model-free
-    - [ ] Value-based
+    - [x] Value-based
         - [x] DQN
         - [x] Double DQN
-        - [ ] Dueling DQN
+        - [x] Dueling DQN
     - [ ] Policy-based
         - [ ] AC
         - [ ] A2C
@@ -28,9 +28,12 @@ Use `python run.py -h` to see the available parameters and get help.
 To run a **demo**, simply run `python run.py`.
 
 # Benchmark Results
+## Value-based
 ![](./result/DQN_CartPole-v1.png)
 
 ![](./result/DoubleDQN_CartPole-v1.png)
+
+![](./result/DuelingDQN_CartPole-v1.png)
 
 # Implementation Details and Tricks
 ## DQN
@@ -47,11 +50,17 @@ Param:
 Namespace(batch_size=64, benchmark='DQN', device='cuda:0', env='CartPole-v1', epoch=500, epsilon=0.01, gamma=0.95, hidden=128, lr=0.002, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
 ```
 ## Double DQN
-Just change the way we computer Q target:
-
-r + Q_target(s, a_target) -> r + Q_target(s, a_origin)
+1. Just change the way we computer Q target: $$r + Q_{target}(s, a_{target}) -> r + Q_{target}(s, a_{origin})$$
 
 Param:
 ```
 Namespace(batch_size=64, benchmark='DoubleDQN', device='cuda:0', env='CartPole-v1', epoch=500, epsilon=0.01, gamma=0.95, hidden=128, lr=0.001, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
+```
+
+## Dueling DQN
+1. Change the network (add advantage function layer and value function layer).
+
+Param:
+```
+Namespace(batch_size=64, benchmark='DuelingDQN', device='cuda:0', env='CartPole-v1', epoch=500, epsilon=0.01, gamma=0.95, hidden=128, lr=0.001, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
 ```
