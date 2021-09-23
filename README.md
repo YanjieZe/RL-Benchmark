@@ -9,7 +9,7 @@ An RL Benchmark. Easy to use, experiment, visualize, compare results, and extend
         - [x] Dueling DQN
     - [ ] Policy-based
         - [x] Reinforce
-        - [ ] AC
+        - [x] Actor-Critic
         - [ ] A2C
         - [ ] A3C
         - [ ] TRPO
@@ -38,6 +38,7 @@ To run a **demo**, simply run `python run.py`.
 ## Policy-based
 ![](./result/Reinforce_CartPole-v1.png)
 
+![](./result/ActorCritic_CartPole-v1.png)
 
 # Implementation Details and Tricks
 ## DQN
@@ -75,6 +76,15 @@ Namespace(batch_size=64, benchmark='DuelingDQN', device='cuda:0', env='CartPole-
 Param:
 ```
 Namespace(batch_size=64, benchmark='Reinforce', device='cuda:0', env='CartPole-v1', epoch=1000, epsilon=0.01, gamma=0.98, hidden=128, lr=0.001, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
+```
+## Actor-Critic
+1. Use TD error as the factor of the objective in policy gradient.
+2. Use `detach()` to cut off the back propagation. (very important!)
+3. Two-timescale update. `1e-3` for the actor, `1e-2` for the critic. (effect the performance very much)
+
+Param:
+```
+Namespace(actor_lr=0.001, batch_size=64, benchmark='ActorCritic', critic_lr=0.01, device='cuda:0', env='CartPole-v1', epoch=1000, epsilon=0.01, gamma=0.99, hidden=128, lr=0.001, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
 ```
 
 # Reference

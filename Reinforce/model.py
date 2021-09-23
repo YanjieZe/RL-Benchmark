@@ -61,6 +61,7 @@ class Reinforce(nn.Module):
             G = self.gamma*G + reward
             loss = - log_prob * G 
 
-            loss.backward()
+            loss.backward() # the gradient can be cummulated
+            
         self.optimizer.step()
     

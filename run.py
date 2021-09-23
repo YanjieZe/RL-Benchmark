@@ -10,7 +10,7 @@ from DQN import DQN
 from DoubleDQN import DoubleDQN
 from DuelingDQN import DuelingDQN
 from Reinforce import Reinforce
-
+from ActorCritic import ActorCritic
 
 def main(args):
 
@@ -67,6 +67,16 @@ def main(args):
                             learning_rate=lr, 
                             gamma=gamma,
                             device=device)
+    elif agent_name=='ActorCritic':
+        actor_lr = args.actor_lr
+        critic_lr = args.critic_lr
+        agent = ActorCritic(state_dim=state_dim, 
+                            action_dim=action_dim, 
+                            hidden_dim=hidden_dim, 
+                            actor_lr=actor_lr,
+                            critic_lr=critic_lr,
+                            gamma=gamma,
+                            device=device) 
     else:
         raise Exception('%s has not been implemented yet.'%agent_name)
     
@@ -83,11 +93,13 @@ def main(args):
         done = False
 
         reward_sum = 0 # record
-        if agent_name=='Reinforce':
+        if agent_name in ['Reinforce', 'ActorCritic']:
             # record
             reward_list = []
-            state_list = []
+            cur_state_list = []
             action_list = []
+            next_state_list = []
+            done_list = []
 
         while(not done):
             action = agent.act(cur_state)
@@ -95,7 +107,7 @@ def main(args):
             next_state = np.array(next_state, dtype=np.float)
             
             # DQN, DoubleDQN, DuelingDQN
-            if agent_name=='DQN' or agent_name=='DoubleDQN' or agent_name=='DuelingDQN':
+            if agent_name in ['DQN', 'DoubleDQN', 'DuelingDQN']:
 
                 agent.record(cur_state, action, reward, next_state, done)
                 if len(agent.replay_buffer) > batch_size:
@@ -104,18 +116,26 @@ def main(args):
                 else:
                     continue
             # Reinforce
-            elif agent_name=='Reinforce':
+            elif agent_name in ['Reinforce', 'ActorCritic']  :
                 action_list.append(action)
                 reward_list.append(reward)
-                state_list.append(cur_state)
+                cur_state_list.append(cur_state)
+                next_state_list.append(next_state)
+                done_list.append(done)
+            # elif agent_name in ['ActorCritic']:
+            #     transitions = {'states':cur_state, 'next_states':next_state, 'rewards':reward, 'dones':done,'actions':action}
+            #     agent.update(transitions)
                 
             cur_state = next_state # update state
             reward_sum += reward
+
             if done:
                 break
         
-        if agent_name=='Reinforce':# update for Reinforce
-            transitions = {'states':state_list, 'actions':action_list, 'rewards': reward_list}
+        if agent_name in ['Reinforce', 'ActorCritic']:# update for Reinforce
+            transitions = {'states':cur_state_list, 'actions':action_list, \
+                        'rewards': reward_list, 'dones':done_list,\
+                         'next_states':next_state_list}
             agent.update(transitions)
         
         if args.plot:
@@ -137,22 +157,27 @@ parser = argparse.ArgumentParser(description="RL Benchmark by Yanjie Ze.")
 
 # general setting
 benchmark_algorithms = ['DQN', 'DoubleDQN', 'DuelingDQN', 'Reinforce', 'ActorCritic','A2C','A3C']
-parser.add_argument('-b', '--benchmark', choices=benchmark_algorithms, default='Reinforce', help="Names of benchmarks you select.")
-parser.add_argument('--env', choices=['CartPole-v1', 'Acrobot-v1', 'MountainCar-v0','Pendulum-v0'], default='CartPole-v1', help='Name of your envs.')
+parser.add_argument('-b', '--benchmark', choices=benchmark_algorithms, default='ActorCritic', help="Names of benchmarks you select.")
+parser.add_argument('--env', choices=['CartPole-v1', 'CartPole-v0', 'Acrobot-v1', 'MountainCar-v0','Pendulum-v0'], default='CartPole-v1', help='Name of your envs.')
 parser.add_argument('--epoch', type=int, default=1000, help='Num of epochs.')
 parser.add_argument('--device', type=str, default='cuda:0', help='Device you use, cpu or cuda.')
 parser.add_argument('--seed', default=0, type=float, help='Seed for randomness. Aim for reproducibility.')
 parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate for neural networks\' upate.')
 parser.add_argument('--epsilon', default=0.01, type=float, help='Factor of epsilon-greedy exploration.')
-parser.add_argument('--gamma', default=0.98, type=float, help='Discount factor of the Markov decision process.')
+parser.add_argument('--gamma', default=0.99, type=float, help='Discount factor of the Markov decision process.')
 parser.add_argument('--hidden', default=128, type=int, help='Size of the hidden layer in neural networks.')
 parser.add_argument('--save', default=True, type=bool, help='Whether to save the model\' s check point.')
 parser.add_argument('--plot', default=True, type=bool, help='Whether to plot the result')
 
-# DQN setting
+# DQN and its family 's setting
 parser.add_argument('--target_update', default=10, type=int, help='For DQN: updating target network in DQN per N iterations.')
 parser.add_argument('--batch_size', default=64, type=int, help='Batch size for updating using replay buffer.')
 parser.add_argument('--max_capacity', default=1000, type=int, help='Max capacity of the replay buffer.')
+
+# Actor-Critic 's setting
+parser.add_argument('--actor_lr', default=1e-3, type=float, help='Learning rate for the actor in Actor-Critic.')
+parser.add_argument('--critic_lr', default=1e-2, type=float, help='Learning rate for the critic in Actor-Critic.')
+
 
 if __name__=='__main__':
     args = parser.parse_args()
