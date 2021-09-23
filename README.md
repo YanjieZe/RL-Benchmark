@@ -8,10 +8,10 @@ An RL Benchmark. Easy to use, experiment, visualize, compare results, and extend
         - [x] Double DQN
         - [x] Dueling DQN
     - [ ] Policy-based
+        - [x] Reinforce
         - [ ] AC
         - [ ] A2C
         - [ ] A3C
-        - [ ] Reinforce
         - [ ] TRPO
         - [ ] ACKTR
         - [ ] PPO
@@ -34,6 +34,10 @@ To run a **demo**, simply run `python run.py`.
 ![](./result/DoubleDQN_CartPole-v1.png)
 
 ![](./result/DuelingDQN_CartPole-v1.png)
+
+## Policy-based
+![](./result/Reinforce_CartPole-v1.png)
+
 
 # Implementation Details and Tricks
 ## DQN
@@ -64,3 +68,14 @@ Param:
 ```
 Namespace(batch_size=64, benchmark='DuelingDQN', device='cuda:0', env='CartPole-v1', epoch=500, epsilon=0.01, gamma=0.95, hidden=128, lr=0.001, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
 ```
+
+## Reinforce
+1. Use `action_dist = torch.distributions.Categorical(probs)` to take action.
+
+Param:
+```
+Namespace(batch_size=64, benchmark='Reinforce', device='cuda:0', env='CartPole-v1', epoch=1000, epsilon=0.01, gamma=0.98, hidden=128, lr=0.001, max_capacity=1000, plot=True, save=True, seed=0, target_update=10)
+```
+
+# Reference
+1. [动手学强化学习](https://hrl.boyuai.com/)

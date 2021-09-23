@@ -9,6 +9,7 @@ import numpy as np
 from DQN import DQN
 from DoubleDQN import DoubleDQN
 from DuelingDQN import DuelingDQN
+from Reinforce import Reinforce
 
 
 def main(args):
@@ -59,6 +60,13 @@ def main(args):
                     target_update=target_update,
                     max_capacity=args.max_capacity,
                     device=device).float()
+    elif agent_name=='Reinforce':
+        agent = Reinforce(state_dim=state_dim, 
+                            action_dim=action_dim, 
+                            hidden_dim=hidden_dim, 
+                            learning_rate=lr, 
+                            gamma=gamma,
+                            device=device)
     else:
         raise Exception('%s has not been implemented yet.'%agent_name)
     
@@ -75,13 +83,18 @@ def main(args):
         done = False
 
         reward_sum = 0 # record
+        if agent_name=='Reinforce':
+            # record
+            reward_list = []
+            state_list = []
+            action_list = []
 
         while(not done):
             action = agent.act(cur_state)
             next_state,reward, done, _  = env.step(action)
             next_state = np.array(next_state, dtype=np.float)
             
-            # DQN, DoubleDQN
+            # DQN, DoubleDQN, DuelingDQN
             if agent_name=='DQN' or agent_name=='DoubleDQN' or agent_name=='DuelingDQN':
 
                 agent.record(cur_state, action, reward, next_state, done)
@@ -90,36 +103,48 @@ def main(args):
                     agent.update(transitions)
                 else:
                     continue
-            
+            # Reinforce
+            elif agent_name=='Reinforce':
+                action_list.append(action)
+                reward_list.append(reward)
+                state_list.append(cur_state)
+                
             cur_state = next_state # update state
             reward_sum += reward
             if done:
                 break
-
+        
+        if agent_name=='Reinforce':# update for Reinforce
+            transitions = {'states':state_list, 'actions':action_list, 'rewards': reward_list}
+            agent.update(transitions)
+        
         if args.plot:
             reward_sum_list.append(reward_sum)
         print('epoch %u \'s reward sum: %f'%(epoch, reward_sum))
 
-    if args.save:
-        utils.save_model(model_name='%s_%s'%(agent_name,env_name), model=agent)
-
     if args.plot:
         utils.plot_one(model_name=agent_name, env_name=env_name, reward_list=reward_sum_list)
 
+
+    if args.save:
+        utils.save_model(model_name='%s_%s'%(agent_name,env_name), model=agent)
+
+    
 
 
 # parser
 parser = argparse.ArgumentParser(description="RL Benchmark by Yanjie Ze.")
 
 # general setting
-parser.add_argument('-b', '--benchmark', choices=['DQN', 'DoubleDQN', 'DuelingDQN'], default='DuelingDQN', help="Names of benchmarks you select.")
+benchmark_algorithms = ['DQN', 'DoubleDQN', 'DuelingDQN', 'Reinforce', 'ActorCritic','A2C','A3C']
+parser.add_argument('-b', '--benchmark', choices=benchmark_algorithms, default='Reinforce', help="Names of benchmarks you select.")
 parser.add_argument('--env', choices=['CartPole-v1', 'Acrobot-v1', 'MountainCar-v0','Pendulum-v0'], default='CartPole-v1', help='Name of your envs.')
-parser.add_argument('--epoch', type=int, default=500, help='Num of epochs.')
+parser.add_argument('--epoch', type=int, default=1000, help='Num of epochs.')
 parser.add_argument('--device', type=str, default='cuda:0', help='Device you use, cpu or cuda.')
 parser.add_argument('--seed', default=0, type=float, help='Seed for randomness. Aim for reproducibility.')
 parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate for neural networks\' upate.')
 parser.add_argument('--epsilon', default=0.01, type=float, help='Factor of epsilon-greedy exploration.')
-parser.add_argument('--gamma', default=0.95, type=float, help='Discount factor of the Markov decision process.')
+parser.add_argument('--gamma', default=0.98, type=float, help='Discount factor of the Markov decision process.')
 parser.add_argument('--hidden', default=128, type=int, help='Size of the hidden layer in neural networks.')
 parser.add_argument('--save', default=True, type=bool, help='Whether to save the model\' s check point.')
 parser.add_argument('--plot', default=True, type=bool, help='Whether to plot the result')
