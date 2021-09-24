@@ -4,20 +4,21 @@ An RL Benchmark. Easy to use, experiment, visualize, compare results, and extend
 # Supported Algorithms
 - [ ] Model-free
     - [x] Value-based
-        - [x] DQN
-        - [x] Double DQN
-        - [x] Dueling DQN
+        - [x] DQN (2013)
+        - [x] Double DQN (2015)
+        - [x] Dueling DQN (2015)
     - [ ] Policy-based
-        - [x] Reinforce
-        - [x] Actor-Critic
-        - [ ] A2C
-        - [ ] A3C
-        - [ ] TRPO
-        - [ ] ACKTR
-        - [ ] PPO
-        - [ ] DDPG
-        - [ ] TD3
-        - [ ] SAC
+        - [x] Reinforce (1992)
+        - [x] Actor-Critic (2000)
+        - [ ] TRPO (2015)
+        - [ ] DDPG (2015)
+        - [ ] A2C (2016)
+        - [ ] A3C (2016)
+        - [ ] ACKTR (2017)
+        - [ ] PPO (2017)
+        - [ ] SAC (2018)
+        - [ ] TD3 (2018)
+        
 - [ ] Model-based
 
 
