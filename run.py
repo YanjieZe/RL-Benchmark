@@ -3,10 +3,10 @@ import gym
 import torch
 import utils
 import numpy as np
-
+from colored import fg, bg, attr
 
 # our benchmark
-from DQN import DQN
+from DQN import DQN, ImgDQN
 from DoubleDQN import DoubleDQN
 from DuelingDQN import DuelingDQN
 from Reinforce import Reinforce
@@ -25,7 +25,15 @@ def main(args):
     env = gym.make(env_name)
     env.reset()
 
-    state_dim = env.observation_space.shape[0]
+    if not args.input_img:
+        state_dim = env.observation_space.shape[0]
+    else:
+        state_dim = np.array([84, 84])
+
+    if args.input_img:
+        print ('%s Form of input: Image %s' % (fg('red') , attr(0)))
+    else:
+        print ('%s Form of input: State %s' % (fg('red') , attr(0)))
     action_dim = env.action_space.n
 
     # set agent
@@ -36,14 +44,23 @@ def main(args):
     device = args.device
     hidden_dim = args.hidden
     lr = args.lr
+
     if agent_name=='DQN':
         target_update = args.target_update
-        agent = DQN(state_dim=state_dim, action_dim=action_dim,
-                    hidden_dim=hidden_dim, learning_rate=lr,
-                    gamma=gamma, epsilon=epsilon,
-                    target_update=target_update,
-                    max_capacity=args.max_capacity,
-                    device=device).float()
+        if not args.input_img:
+            agent = DQN(state_dim=state_dim, action_dim=action_dim,
+                        hidden_dim=hidden_dim, learning_rate=lr,
+                        gamma=gamma, epsilon=epsilon,
+                        target_update=target_update,
+                        max_capacity=args.max_capacity,
+                        device=device).float()
+        else:
+            agent = ImgDQN(state_dim=state_dim, action_dim=action_dim,
+                        hidden_dim=hidden_dim, learning_rate=lr,
+                        gamma=gamma, epsilon=epsilon,
+                        target_update=target_update,
+                        max_capacity=args.max_capacity,
+                        device=device).float()
     elif agent_name=='DoubleDQN':
         target_update = args.target_update
         agent = DoubleDQN(state_dim=state_dim, action_dim=action_dim,
@@ -89,7 +106,7 @@ def main(args):
     for epoch in range(epoch_num):
 
         cur_state = env.reset()
-        cur_state = np.array(cur_state, dtype=np.float)
+        cur_state = np.array(cur_state, dtype=np.float64)
         done = False
 
         reward_sum = 0 # record
@@ -104,7 +121,7 @@ def main(args):
         while(not done):
             action = agent.act(cur_state)
             next_state,reward, done, _  = env.step(action)
-            next_state = np.array(next_state, dtype=np.float)
+            next_state = np.array(next_state, dtype=np.float64)
             
             # DQN, DoubleDQN, DuelingDQN
             if agent_name in ['DQN', 'DoubleDQN', 'DuelingDQN']:
@@ -155,19 +172,22 @@ def main(args):
 # parser
 parser = argparse.ArgumentParser(description="RL Benchmark by Yanjie Ze.")
 
+
 # general setting
 benchmark_algorithms = ['DQN', 'DoubleDQN', 'DuelingDQN', 'Reinforce', 'ActorCritic','A2C','A3C']
-parser.add_argument('-b', '--benchmark', choices=benchmark_algorithms, default='ActorCritic', help="Names of benchmarks you select.")
-parser.add_argument('--env', choices=['CartPole-v1', 'CartPole-v0', 'Acrobot-v1', 'MountainCar-v0','Pendulum-v0'], default='CartPole-v1', help='Name of your envs.')
+parser.add_argument('-b', '--benchmark', choices=benchmark_algorithms, default='DQN', help="Names of benchmarks you select.")
+parser.add_argument('--env', choices=['Pong-v0', 'Pong-ram-v0', 'CartPole-v1', 'CartPole-v0', 'Acrobot-v1', 'MountainCar-v0','Pendulum-v0'], default='CartPole-v1', help='Name of your envs.')
 parser.add_argument('--epoch', type=int, default=1000, help='Num of epochs.')
 parser.add_argument('--device', type=str, default='cuda:0', help='Device you use, cpu or cuda.')
 parser.add_argument('--seed', default=0, type=float, help='Seed for randomness. Aim for reproducibility.')
 parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate for neural networks\' upate.')
 parser.add_argument('--epsilon', default=0.01, type=float, help='Factor of epsilon-greedy exploration.')
 parser.add_argument('--gamma', default=0.99, type=float, help='Discount factor of the Markov decision process.')
-parser.add_argument('--hidden', default=128, type=int, help='Size of the hidden layer in neural networks.')
+parser.add_argument('--hidden', default=64, type=int, help='Size of the hidden layer in neural networks.')
 parser.add_argument('--save', default=True, type=bool, help='Whether to save the model\' s check point.')
 parser.add_argument('--plot', default=True, type=bool, help='Whether to plot the result')
+parser.add_argument('--input_img', default=False, action='store_true')
+
 
 # DQN and its family 's setting
 parser.add_argument('--target_update', default=10, type=int, help='For DQN: updating target network in DQN per N iterations.')
@@ -179,6 +199,9 @@ parser.add_argument('--actor_lr', default=1e-3, type=float, help='Learning rate 
 parser.add_argument('--critic_lr', default=1e-2, type=float, help='Learning rate for the critic in Actor-Critic.')
 
 
+args = parser.parse_args()
+
+assert args.input_img+(args.env=='Pong-v0')==2 or args.input_img+(args.env=='Pong-v0')==0, 'Pong-v0 must use img as input, specify: --input_img'
+
 if __name__=='__main__':
-    args = parser.parse_args()
     main(args)
